@@ -23,9 +23,18 @@ ORDER BY
 
 -- Question 2 --
 SELECT DISTINCT
-    p.Name AS ProductName,
-    p.Style
+    p.ProductID,
+    p.Name,
+    sum(so.OrderQty) AS TotalUnitsSold,
+    sum(so.OrderQty * so.UnitPrice) AS SalesRevenue
 FROM sales.SalesOrderDetail as so
 JOIN Production.Product as p
     ON so.ProductID = p.ProductID
+join sales.SalesOrderHeader as sh
+    ON so.SalesOrderID = sh.SalesOrderID
 WHERE p.Style = 'w' OR p.Style = 'W'
+    AND sh.OrderDate >= '2013-01-01'
+GROUP BY p.ProductID, p.Name
+
+
+-- Question 3 --
