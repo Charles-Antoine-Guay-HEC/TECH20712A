@@ -38,3 +38,83 @@ GROUP BY p.ProductID, p.Name
 
 
 -- Question 3 --
+-- Section a --
+IF OBJECT_ID('Production.ProductWarranty', 'U') IS NOT NULL
+    DROP TABLE Production.ProductWarranty;
+GO
+
+CREATE TABLE Production.ProductWarranty
+(
+    WarrantyID   INT            IDENTITY(1,1) NOT NULL,
+    ProductID    INT            NOT NULL,
+    WarrantyType VARCHAR(20)    NOT NULL,           -- Standard | Extended | Premium
+    Duration     TINYINT        NOT NULL,           -- 12 | 24 | 36
+    Cost         MONEY          NOT NULL,           -- >= 0 (POC)
+
+    CONSTRAINT PK_ProductWarranty
+        PRIMARY KEY CLUSTERED (WarrantyID),
+
+    CONSTRAINT FK_ProductWarranty_Product
+        FOREIGN KEY (ProductID)
+        REFERENCES Production.Product(ProductID),
+
+    -- Makes sure the type and duration match
+    CONSTRAINT CK_ProductWarranty_TypeDuration
+        CHECK (
+            (WarrantyType = 'Standard' AND Duration = 12) OR
+            (WarrantyType = 'Extended' AND Duration = 24) OR
+            (WarrantyType = 'Premium'  AND Duration = 36)
+        ),
+
+    -- Non negative cost
+    CONSTRAINT CK_ProductWarranty_Cost
+        CHECK (Cost >= 0),
+
+    -- No dupplicates of a product
+    CONSTRAINT UQ_ProductWarranty_Product_Type
+        UNIQUE (ProductID, WarrantyType)
+);
+
+-- Section b --
+INSERT INTO Production.ProductWarranty (ProductID, WarrantyType, Duration, Cost)
+VALUES
+(707, 'Standard', 12, 50),
+(708, 'Standard', 12, 62),
+(709, 'Extended', 24, 95),
+(710, 'Extended', 24, 110),
+(712, 'Extended', 24, 137),
+(714, 'Premium',  36, 200),
+(716, 'Standard', 12, 75),
+(720, 'Extended', 24, 105),
+(721, 'Premium',  36, 190),
+(725, 'Premium',  24, 210);
+
+-- There will be an error on line 94 
+-- The INSERT statement conflicted with the CHECK constraint "CK_ProductWarranty_TypeDuration".
+-- This is due to violation of the unique constraint. The premium warranty is of a durantion of 36 not 24
+
+
+-- Section c --
+SELECT 
+    p.Name AS [Product Name],
+    pc.Name AS [Category Name],
+    psc.Name AS [Subcategory Name],
+    pw.WarrantyType,
+    pw.Duration,
+    pw.Cost
+FROM Production.ProductWarranty AS pw
+INNER JOIN Production.Product AS p
+    ON pw.ProductID = p.ProductID
+INNER JOIN Production.ProductSubcategory AS psc
+    ON p.ProductSubcategoryID = psc.ProductSubcategoryID
+INNER JOIN Production.ProductCategory AS pc
+    ON psc.ProductCategoryID = pc.ProductCategoryID
+WHERE pc.Name = 'Clothing'
+ORDER BY pw.Cost DESC;
+
+-- section d --
+IF OBJECT_ID('Production.ProductWarranty', 'U') IS NOT NULL
+BEGIN
+    DROP TABLE Production.ProductWarranty;
+    PRINT 'Table Production.ProductWarranty has been deleted successfully.';
+END
