@@ -27,4 +27,4 @@ AND DATEDIFF(DAY, ps.ListingDate, GETDATE()) > 90;
 This result shows managers which properties are stuck on the market too long. It helps them 
 decide whether to adjust pricing, marketing, or strategy to reduce holding costs and improve 
 profitability.  
-*/ 
+*/
