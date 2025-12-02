@@ -5,9 +5,14 @@
  *		Instructor : Monalisa Mahapatra (A01)
  *		
  *		ANSWERS TO HOMEWORK 3
+*
+*		Student Name : Charles-Antoine GUAY
+*		Student ID   : 11354494
+*		Date         : 28-11-2025
  */
  
 use AdventureWorks2022
+go
 
 /*
 	Question #1 : 
@@ -28,10 +33,10 @@ use AdventureWorks2022
 
 SELECT TOP 1
 	soh.SalesOrderNumber AS 'Invoice Number',
-	soh.TotalDue 'Total Due',
-	CAST(soh.OrderDate AS DATE) AS 'Date of Sale',
+	FORMAT(soh.TotalDue,'P') AS 'Total Due',
+	CAST (soh.OrderDate AS DATE) AS 'Date of Sale',
 	soh.SalesPersonID AS 'Sales Person ID',
-	TRIM(CONCAT(' ',
+	CONCAT(
 		ISNULL(sp.Title, ''),
         ' ',
 		sp.FirstName,
@@ -41,7 +46,7 @@ SELECT TOP 1
 		sp.LastName,
         ' ',
 		ISNULL(sp.Suffix,'')
-	)) AS 'Full Name',
+	) AS 'Full Name',
 	COUNT(sod.SalesOrderDetailID) AS 'Number of Products'
 FROM Sales.SalesOrderHeader soh
 INNER JOIN Sales.SalesOrderDetail sod ON soh.SalesOrderID = sod.SalesOrderID
@@ -73,8 +78,8 @@ GO
 		He specifies that he needs the report to display only the store ID and name, sorted from smallest to largest store ID.
 */
 
-WITH AvgQ4_2013 AS (
-	SELECT AVG(soh.SubTotal) AS AvgSubTotal
+WITH Avg_Q4_2013 AS (
+	SELECT AVG(soh.SubTotal) AS Average_Sub_Total
 	FROM Sales.SalesOrderHeader soh
 	WHERE soh.CustomerID IN (SELECT CustomerID FROM Sales.Customer WHERE StoreID IS NOT NULL)
 		AND YEAR(soh.OrderDate) = 2013
@@ -97,8 +102,8 @@ SELECT
 	q1.StoreID,
 	q1.Name
 FROM Q1_2014_Stores q1
-CROSS JOIN AvgQ4_2013 avg
-WHERE q1.TotalSubTotal > avg.AvgSubTotal
+CROSS JOIN Avg_Q4_2013 avg
+WHERE q1.TotalSubTotal > avg.Average_Sub_Total
 ORDER BY q1.StoreID;
 
 GO
@@ -179,3 +184,5 @@ INNER JOIN Production.Product p ON sd.ProductID = p.ProductID
 INNER JOIN Sales.SpecialOffer so ON sd.SpecialOfferID = so.SpecialOfferID
 WHERE sd.SpecialOfferID != 1 -- Exclude No Discount
 ORDER BY so.DiscountPct DESC;
+
+GO
