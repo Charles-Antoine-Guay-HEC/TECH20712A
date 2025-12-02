@@ -51,22 +51,6 @@ ItemID INT IDENTITY(1,1) PRIMARY KEY,
 ItemDescription NVARCHAR(100) NOT NULL
 )
 
-create table IncludedItems
-(
-    InclusionID INT IDENTITY(1,1) PRIMARY KEY,
-    PropertySaleID INT NOT NULL FOREIGN KEY REFERENCES PropertySale(PropertySaleID),
-    ItemID INT NOT NULL FOREIGN KEY REFERENCES Items(ItemID),
-    Quantity INT NOT NULL CHECK (Quantity > 0)
-)
-
-CREATE TABLE ExcludedItems
-(
-    ExclusionID INT IDENTITY(1,1) PRIMARY KEY,
-    PropertySaleID INT NOT NULL FOREIGN KEY REFERENCES PropertySale(PropertySaleID),
-    ItemID INT NOT NULL FOREIGN KEY REFERENCES Items(ItemID),
-    Quantity INT NOT NULL CHECK (Quantity > 0)
-)
-
 CREATE TABLE Property 
 ( 
 PropertyID INT IDENTITY(1,1) PRIMARY KEY, 
@@ -94,6 +78,22 @@ PropertyID INT NOT NULL FOREIGN KEY REFERENCES Property(PropertyID),
 CONSTRAINT chk_openhouse CHECK (OpenHouseDateTime IS NULL OR 
 OpenHouseDateTime > ListingDate) 
 ); 
+
+create table IncludedItems
+(
+    InclusionID INT IDENTITY(1,1) PRIMARY KEY,
+    PropertySaleID INT NOT NULL FOREIGN KEY REFERENCES PropertySale(PropertySaleID),
+    ItemID INT NOT NULL FOREIGN KEY REFERENCES Items(ItemID),
+    Quantity INT NOT NULL CHECK (Quantity > 0)
+)
+
+CREATE TABLE ExcludedItems
+(
+    ExclusionID INT IDENTITY(1,1) PRIMARY KEY,
+    PropertySaleID INT NOT NULL FOREIGN KEY REFERENCES PropertySale(PropertySaleID),
+    ItemID INT NOT NULL FOREIGN KEY REFERENCES Items(ItemID),
+    Quantity INT NOT NULL CHECK (Quantity > 0)
+)
 
 CREATE TABLE ClientType  
 ( 

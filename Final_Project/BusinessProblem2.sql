@@ -1,22 +1,61 @@
 /* Business Problem 2: 
-Managers want to see which property features are most associated  
-with client satisfaction. This helps identify what features drive positive ratings  
-and therefore highlight those in marketing and listings.  
-Here's a query that displays each feature along with the average rating of properties 
-that include it.  
-We show only the features where the average rating is greater than or equal to 4.  
+When a house is sold or rented, we do not want to sell it twice or to rent it out to two different clients.
+To avoid that, when a house is sold or rented, we want to move the house and the listings to an archive table.
+theese tables are called ArchiveHouse and ArchiveListing.
+From there, we will be able to have a trace of what has ben sold or rented in the past.
 */ 
 
-SELECT f.Feature,  
-AVG(c.Rating) AS AvgRating,  
-COUNT(c.CommentsID) AS TotalComments 
-FROM Comments c 
-JOIN Client cl ON c.ClientID = cl.ClientID 
-JOIN Wishlist w ON cl.ClientID = w.ClientID 
-JOIN WishlistFeature wlf ON wlf.WishlistID = w.WishlistID 
-JOIN Feature f ON wlf.FeatureID = f.FeatureID 
-GROUP BY f.Feature 
-HAVING AVG(c.Rating) >= 4;  
+USE LiveListing
+GO
+
+-- Create ArchiveListing table
+
+DROP TABLE IF EXISTS ArchiveListing;
+GO
+
+CREATE TABLE ArchiveListing
+(
+    ArchiveID INT IDENTITY(1,1) PRIMARY KEY, 
+    PropertySaleID INT,
+    SalePrice DECIMAL(12,2) NOT NULL, 
+    ListingDate DATE NOT NULL, 
+    ItemsIncluded NVARCHAR(255), 
+    ItemsExcluded NVARCHAR(255), 
+    OpenHouseDateTime DATETIME, 
+    ArchivePropertyID INT NOT NULL, 
+    CONSTRAINT chk_openhouse CHECK (OpenHouseDateTime IS NULL OR 
+    OpenHouseDateTime > ListingDate) 
+)
+GO
+
+-- Create the trigger --
+DROP TRIGGER IF EXISTS trg_ArchivePropertySale;
+GO
+
+CREATE TRIGGER trg_ArchivePropertySale ON PropertySale
+After Delete
+AS
+BEGIN
+    DECLARE @SaleID INT;
+    DECLARE @SalePrice DECIMAL(12,2);
+    DECLARE @ListingDate DATE;
+    DECLARE @ItemsIncluded NVARCHAR(255);
+    DECLARE @ItemsExcluded NVARCHAR(255);
+    DECLARE @OpenHouseDateTime DATETIME;
+    DECLARE @PropertyID INT;
+
+    SET @SaleID = (SELECT DELETED.PropertySaleID FROM DELETED);
+    SET @SalePrice = (SELECT DELETED.SalePrice FROM DELETED);
+    SET @ListingDate = (SELECT DELETED.ListingDate FROM DELETED);
+    SET @ItemsIncluded = (SELECT DELETED.ItemsIncluded FROM DELETED);
+    SET @ItemsExcluded = (SELECT DELETED.ItemsExcluded FROM DELETED);
+    SET @OpenHouseDateTime = (SELECT DELETED.OpenHouseDateTime FROM DELETED);
+    SET @PropertyID = (SELECT DELETED.PropertyID FROM DELETED);
+
+    INSERT INTO ArchiveListing (PropertySaleID, SalePrice, ListingDate, ItemsIncluded, ItemsExcluded, OpenHouseDateTime, ArchivePropertyID)
+    VALUES (@SaleID, @SalePrice, @ListingDate, @ItemsIncluded, @ItemsExcluded, @OpenHouseDateTime, @PropertyID);
+END
+GO
 
 /* Interpretation:  
 This result highlights which features (like pools, garages, or fireplaces) are most linked to 
