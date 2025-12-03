@@ -1,7 +1,7 @@
 /* Business Problem 2: 
 When a house is sold or rented, we do not want to sell it twice or to rent it out to two different clients.
-To avoid that, when a house is sold or rented, we want to move the house and the listings to an archive table.
-theese tables are called ArchiveHouse and ArchiveListing.
+To avoid that, when a house is sold or rented, we want to move the listings to an archive table.
+this table is called ArchiveListing.
 From there, we will be able to have a trace of what has ben sold or rented in the past.
 */ 
 
@@ -58,7 +58,8 @@ END
 GO
 
 /* Interpretation:  
-This result highlights which features (like pools, garages, or fireplaces) are most linked to 
-client satisfaction. Managers can emphasize these features in marketing and prioritize them 
-in property improvements. 
+When a listing is deleted from the PropertySale table, the trigger trg_ArchivePropertySale is activated.
+This trigger captures the details of the deleted listing and inserts them into the ArchiveListing table.
+This ensures that we maintain a record of all sold or rented properties, preventing duplicate sales or rentals.
+While the listing is removed, the property details remain intact in the Property table for future reference.
 */
